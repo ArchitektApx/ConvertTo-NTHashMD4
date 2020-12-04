@@ -52,7 +52,7 @@ function ConvertTo-NTHashMD4 {
     UTF7
     BigEndianUnicode  (aka UTF16-BE) 
     Latin1      (Only Powershell Core on Linux - replacement for Windows 1252)
-    Default     Default means Windows1252/ISO-8869-1 for most Windows Installations (EU/USA)
+    SysDefault  Windows1252/ISO-8869-1 for most Windows Installations (EU/USA)
                 and UTF8 on Linux (and I guess MacOS?)
 .PARAMETER bArray
     A byte array on which the Hash should be calculated
@@ -119,7 +119,7 @@ function ConvertTo-NTHashMD4 {
             'BigEndianUnicode' {
                 $Decoder = [System.Text.Encoding]::BigEndianUnicode
             }
-            'Default' {
+            'SysDefault' {
                 $Decoder = [System.Text.Encoding]::Default
             }
             'Latin1'{
