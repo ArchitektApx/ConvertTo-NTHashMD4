@@ -312,11 +312,7 @@ Add-Type -TypeDefinition @'
         $M = $null
         [System.GC]::Collect()
 
-        if($UpperCase) {
-            return "$A$B$C$D".ToUpper()
-        }
-        else {
-            return "$A$B$C$D"
-        }
+        if($UpperCase) { return "$A$B$C$D".ToUpper() }
+        else { return "$A$B$C$D" }
     }
 }
