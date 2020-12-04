@@ -1,4 +1,4 @@
-function ConvertTo-NTHashMD4{
+function ConvertTo-NTHashMD4 {
 <#
 .SYNOPSIS
     Calculate MD4 / NT Hashes (NTLM) on strings and byte arrays 
