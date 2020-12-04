@@ -151,14 +151,8 @@ function ConvertTo-NTHashMD4{
             [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
             [System.GC]::Collect()
         }
-        if($String)
-        {
-            $Array = $Decoder.GetBytes($String)
-        }
-        if($bArray)
-        {
-            $Array = $bArray
-        }
+        if($String) { $Array = $Decoder.GetBytes($String) }
+        if($bArray) { $Array = $bArray }
 
         # Copy the InputArray to an ArrayList for easy Additions
         $M = [System.Collections.ArrayList]@()
@@ -220,20 +214,17 @@ Add-Type -TypeDefinition @'
 '@ | Out-Null
 
         # define 3 auxiliary functions
-        function FF([uint32]$X, [uint32]$Y, [uint32]$Z)
-        {
+        function FF([uint32]$X, [uint32]$Y, [uint32]$Z) {
             (($X -band $Y) -bor ((-bnot $X) -band $Z))
         }
-        function GG([uint32]$X, [uint32]$Y, [uint32]$Z)
-        {
+        function GG([uint32]$X, [uint32]$Y, [uint32]$Z) {
             (($X -band $Y) -bor ($X -band $Z) -bor ($Y -band $Z))
         }
-        function HH([uint32]$X, [uint32]$Y, [uint32]$Z){
+        function HH([uint32]$X, [uint32]$Y, [uint32]$Z) {
             ($X -bxor $Y -bxor $Z)
         }
         # processing message in one-word blocks
-        for($i = 0; $i -lt $M.Count; $i += 64)
-        {
+        for($i = 0; $i -lt $M.Count; $i += 64) {
             # Save a copy of A/B/C/D
             $AA = $A
             $BB = $B
@@ -321,12 +312,10 @@ Add-Type -TypeDefinition @'
         $M = $null
         [System.GC]::Collect()
 
-        if($UpperCase)
-        {
+        if($UpperCase) {
             return "$A$B$C$D".ToUpper()
         }
-        else
-        {
+        else {
             return "$A$B$C$D"
         }
     }
