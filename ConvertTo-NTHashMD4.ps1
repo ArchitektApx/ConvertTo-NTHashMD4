@@ -331,10 +331,3 @@ Add-Type -TypeDefinition @'
         }
     }
 }
-
-$Creds = Get-Credential 
-
-ConvertTo-NTHashMD4 -String 'Test'
-ConvertTo-NTHashMD4 -String 'Test' -Encoding ASCII
-ConvertTo-NTHashMD4 -SecureString $Creds.password 
-ConvertTo-NTHashMD4 -bArray ([System.Text.Encoding]::UTF8.GetBytes('teststring'))
