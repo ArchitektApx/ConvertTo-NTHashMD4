@@ -156,7 +156,7 @@ function ConvertTo-NTHashMD4 {
 
         # Copy the InputArray to an ArrayList for easy Additions
         $M = [System.Collections.ArrayList]@()
-        for ($i = 0; $i -le ($Array.count -1); $i++){
+        for ($i = 0; $i -le ($Array.count -1); $i++) {
             $null = $M.Add($Array[$i])
         } 
         ## RFC 1320 3.1 Append Padding bits
@@ -171,12 +171,12 @@ function ConvertTo-NTHashMD4 {
             message becomes congruent to 448, modulo 512."
             448 % 512 = 448 Bit
         #>
-        while ($M.count % 64 -ne 56) {$null = $M.Add(0)}
+        while ($M.count % 64 -ne 56) { $null = $M.Add(0) }
         <#
             "In all, at least one bit and at most 512 bits are appended."
             448 Bit + 64 Bit = 512 Bit
         #>
-        for ($i = 1; $i -le 8; $i++) { $null = $M.Add([int]0)}
+        for ($i = 1; $i -le 8; $i++) { $null = $M.Add([int]0) }
         
         # Convert the ArrayList into a ByteArray
         [Byte[]]$M = $M 
