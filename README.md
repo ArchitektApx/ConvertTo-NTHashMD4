@@ -17,7 +17,7 @@ an byte array from the input string resulted in it beeing treated as
 ASCII/UTF8 for ascii chars (lost 8 Bit of zeros) and strange results 
 for non-ascii chars.
 
-## Original Method 
+Original Method: 
 ```powershell    
     $Array = [byte[]]@()
     if($String)
