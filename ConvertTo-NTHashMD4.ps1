@@ -147,12 +147,8 @@ function ConvertTo-NTHashMD4 {
                 $Decoder = [System.Text.Encoding]::Default
             }
             'Latin1'{
-                if($PSVersionTable.PSVersion.Major -ge 6) {
-                    if($isLinux -or $IsMacOS) {
-                        $Decoder = [System.Text.Encoding]::Latin1
-                    } else {
-                        throw 'Latin1 is not supported on Windows'
-                    }
+                if($PSVersionTable.PSVersion.Major -ge 6 -and ($isLinux -or $IsMacOS)) {
+                    $Decoder = [System.Text.Encoding]::Latin1
                 } else {
                     throw 'Latin1 is not supported on Windows'
                 }
