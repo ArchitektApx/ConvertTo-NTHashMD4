@@ -37,11 +37,24 @@ function ConvertTo-NTHashMD4 {
     This also means that the ouput is a valid NT Hash/NTLM Hash 
     for any given UTF16-LE input as NT Hash = md4(utf16-le(passphrase)).
 
-    SecureStrings:
-    You can pass a SecureStrings and the Script tries its best to keep the
-    string as plaintext for as short as possible.
-
+    SecureStrings and Impact on performance:
+    If you pass a SecureString the script tries to keep it kinda 'secure' by 
+    trying to flush the plaintext from memory as soon as possible.
     https://get-powershellblog.blogspot.com/2017/06/how-safe-are-your-strings.html
+    
+    This has a quite noticable effect on performance but this is not really important 
+    for most use-cases where you specificly choose SecureStrings.
+
+    Example: 
+    Measure-Command { 1..100 | % {ConvertTo-NTHashMD4 -SecureString $Creds.password} }
+    Seconds           : 9
+    Milliseconds      : 384
+    Ticks             : 93846611
+    Measure-Command { 1..100 | % {ConvertTo-NTHashMD4 -String 'password1'} }
+    Seconds           : 0
+    Milliseconds      : 795
+    Ticks             : 7950702
+
 
     Reference:
     https://tools.ietf.org/html/rfc1320
@@ -197,9 +210,11 @@ function ConvertTo-NTHashMD4 {
         # Replace last 8 Padding Bytes from with b 
         @([BitConverter]::GetBytes($Array.Count * 8)).CopyTo($M, $M.Count - 8)
 
-        # Cleanup
-        $Array = $Null
-        [System.GC]::Collect()
+        # flush Inputarray if it came from a SecureString
+        if($SecureString) {
+            $Array = $Null
+            [System.GC]::Collect()
+        }
 
         # message digest buffer (A,B,C,D)
         $A = [Convert]::ToUInt32('0x67452301', 16)
@@ -306,9 +321,12 @@ Add-Type -TypeDefinition @'
             $D = ($D + $DD) -band [uint32]::MaxValue
             # Increment end
         }
-        #Cleanup once again 
-        $M = $null
-        [System.GC]::Collect()
+
+        # flush everything thats left of $M if it came from a SecureString
+        if ($SecureString) {
+            $M = $null
+            [System.GC]::Collect()
+        }
 
         # Output start
         $A = ('{0:x8}' -f $A) -ireplace '^(\w{2})(\w{2})(\w{2})(\w{2})$', '$4$3$2$1'

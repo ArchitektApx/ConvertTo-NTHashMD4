@@ -35,11 +35,24 @@ option for other encodings via parameters (for MD4).
 This also means that the ouput is a valid NT Hash/NTLM Hash 
 for any given UTF16-LE input as NT Hash = md4(utf16-le(passphrase)).
 
-## SecureStrings
-You can pass a SecureStrings and the Script tries its best to keep the
-string as plaintext for as short as possible.
-
+## SecureStrings and Impact on performance:
+If you pass a SecureString the script tries to keep it kinda 'secure' by 
+trying to flush the plaintext from memory as soon as possible.
 https://get-powershellblog.blogspot.com/2017/06/how-safe-are-your-strings.html
+    
+This has a quite noticable effect on performance but this is not really important 
+for most use-cases where you specificly choose SecureStrings.
+
+```powershell
+Measure-Command { 1..100 | % {ConvertTo-NTHashMD4 -SecureString $Creds.password} }
+Seconds           : 9
+Milliseconds      : 384
+Ticks             : 93846611
+Measure-Command { 1..100 | % {ConvertTo-NTHashMD4 -String 'password1'} }
+Seconds           : 0
+Milliseconds      : 795
+Ticks             : 7950702
+```
 
 ## Reference
 https://tools.ietf.org/html/rfc1320
