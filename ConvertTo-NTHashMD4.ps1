@@ -1,15 +1,17 @@
 function ConvertTo-NTHashMD4 {
 <#
 .SYNOPSIS
-    Calculate MD4 / NT Hashes (NTLM) on strings and byte arrays 
+    Calculate MD4/NTHash/NTLM Hashes in Powershell 
 .DESCRIPTION
-    Calculate MD4 Hashes based on the work of Larry Song.
+    Calculate MD4/NTHash/NTLM Hashes in Powershell 
+    based on the work of Larry Song.
     (https://github.com/LarrysGIT/MD4-powershell)
 
     Fixes:
 
-    The original can't properly handle little endian utf16 input 
-    and strings that result in a message size of more than 56 bytes.
+    The original can't properly handle UTF16-LE input 
+    and strings that result in a message size of more than 55 bytes
+    since there was an error in padding.
     (Problems started to unfold at 28 characters utf16 and more)
     
     A string in Powershell uses the String Class of .Net,
@@ -21,7 +23,7 @@ function ConvertTo-NTHashMD4 {
     ASCII/UTF8 for ascii chars (lost 8 Bit of zeros) and strange results 
     for non-ascii chars.
 
-    # Original Method 
+    Original Method: 
     $Array = [byte[]]@()
     if($String)
     {
@@ -31,12 +33,18 @@ function ConvertTo-NTHashMD4 {
     Now the function treats input as UTF16-LE as expected and gives the 
     option for other encodings via parameters (for MD4).
 
-    NT HASH/NTLM: 
+    NT HASH/NTLM:
     This also means that the ouput is a valid NT Hash/NTLM Hash 
-    for any given UTF16-LE input as NT Hash = md4(utf16-le(passphrase))
+    for any given UTF16-LE input as NT Hash = md4(utf16-le(passphrase)).
 
-    # Reference: https://tools.ietf.org/html/rfc1320
+    SecureStrings:
+    You can pass a SecureStrings and the Script tries its best to keep the
+    string as plaintext for as short as possible.
 
+    https://get-powershellblog.blogspot.com/2017/06/how-safe-are-your-strings.html
+
+    Reference:
+    https://tools.ietf.org/html/rfc1320
 .PARAMETER String
     A String on which the Hash should be calculated 
 .PARAMETER SecureString
@@ -44,7 +52,6 @@ function ConvertTo-NTHashMD4 {
 .PARAMETER Encoding 
     The encoding in which the string should be as
     'Real' Default is UTF16-LE
-    
     Besides that allowed values are:
     ASCII
     UTF32 
@@ -61,7 +68,6 @@ function ConvertTo-NTHashMD4 {
 .EXAMPLE
     Calculate the NTHash of a String
     "Password1" | ConvertTo-NTHashMD4 
-
     Calculate the NTHash of a SecureString
     [PSCredential]$CredObj.password | ConvertTo-NTHash 
 .EXAMPLE 
@@ -88,7 +94,7 @@ function ConvertTo-NTHashMD4 {
         $SecureString,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('ASCII','UTF32','UTF8','BigEndianUnicode','UTF7','Latin1','Default')]
+        [ValidateSet('ASCII','UTF32','UTF8','BigEndianUnicode','UTF7','Latin1','SysDefault')]
         [String]
         $Encoding,
 
@@ -163,7 +169,7 @@ function ConvertTo-NTHashMD4 {
         <# 
             "... a single "1" bit is appended to the message
             and then "0" bits are appended ...." 
-            0 x80 = 128 = 1000 0000
+            0x80 = 128 = 1000 0000
         #>
         $null = $M.Add(0x80)
         <#
@@ -180,16 +186,15 @@ function ConvertTo-NTHashMD4 {
         
         # Convert the ArrayList into a ByteArray
         [Byte[]]$M = $M 
-
         <#
             3.2 Append Length 
             "A 64-bit representation of b (the length of the message before the
             padding bits were added) is appended to the result of the previous
             step"
             "At this point the resulting message (after padding with bits and with
-            has a length that is an exact multiple of 512 bits"
+            b) has a length that is an exact multiple of 512 bits"
         #>
-        # Replace last 8 Padding Bytes with b 
+        # Replace last 8 Padding Bytes from with b 
         @([BitConverter]::GetBytes($Array.Count * 8)).CopyTo($M, $M.Count - 8)
 
         # Cleanup
@@ -301,6 +306,10 @@ Add-Type -TypeDefinition @'
             $D = ($D + $DD) -band [uint32]::MaxValue
             # Increment end
         }
+        #Cleanup once again 
+        $M = $null
+        [System.GC]::Collect()
+
         # Output start
         $A = ('{0:x8}' -f $A) -ireplace '^(\w{2})(\w{2})(\w{2})(\w{2})$', '$4$3$2$1'
         $B = ('{0:x8}' -f $B) -ireplace '^(\w{2})(\w{2})(\w{2})(\w{2})$', '$4$3$2$1'
@@ -308,11 +317,8 @@ Add-Type -TypeDefinition @'
         $D = ('{0:x8}' -f $D) -ireplace '^(\w{2})(\w{2})(\w{2})(\w{2})$', '$4$3$2$1'
         # Output end
 
-        #Cleanup once again 
-        $M = $null
-        [System.GC]::Collect()
-
-        if($UpperCase) { return "$A$B$C$D".ToUpper() }
-        else { return "$A$B$C$D" }
+        # Output the Hash
+        if($UpperCase) { "$A$B$C$D".ToUpper() }
+        else { "$A$B$C$D" }
     }
 }

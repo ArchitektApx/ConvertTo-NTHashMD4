@@ -1,11 +1,13 @@
-# Convert-NTHashMD4 
+# ConvertTo-NTHashMD4 
+
 Calculate MD4/NTHash/NTLM Hashes in Powershell based on the work of Larry Song.
 (https://github.com/LarrysGIT/MD4-powershell)
 
 ## Fixes
 
 The original can't properly handle UTF16-LE input 
-and strings that result in a message size of more than 55 bytes.
+and strings that result in a message size of more than 55 bytes
+since there was an error in padding.
 (Problems started to unfold at 28 characters utf16 and more)
     
 A string in Powershell uses the String Class of .Net,
@@ -31,14 +33,13 @@ option for other encodings via parameters (for MD4).
 
 ## NT HASH/NTLM
 This also means that the ouput is a valid NT Hash/NTLM Hash 
-for any given UTF16-LE input as NT Hash = md4(utf16-le(passphrase))
+for any given UTF16-LE input as NT Hash = md4(utf16-le(passphrase)).
 
 ## SecureStrings
 You can pass a SecureStrings and the Script tries its best to keep the
 string as plaintext for as short as possible.
 
 https://get-powershellblog.blogspot.com/2017/06/how-safe-are-your-strings.html
-
 
 ## Reference
 https://tools.ietf.org/html/rfc1320
