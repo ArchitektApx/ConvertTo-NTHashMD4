@@ -122,6 +122,11 @@ function ConvertTo-NTHashMD4 {
         $UpperCase
     )
     begin {
+
+        if(!($SecureString -or $String -or $bArray)) {
+            Write-Error -Message 'No Arguments were provided' 
+            return
+        }
         switch ($Encoding) {
             'ASCII' {
                 $Decoder = [System.Text.Encoding]::ASCII
@@ -340,3 +345,5 @@ Add-Type -TypeDefinition @'
         else { "$A$B$C$D" }
     }
 }
+
+ConvertTo-NTHashMD4 
