@@ -341,5 +341,3 @@ Add-Type -TypeDefinition @'
         else { "$A$B$C$D" }
     }
 }
-
-ConvertTo-NTHashMD4 
